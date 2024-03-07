@@ -15,7 +15,7 @@ selection = { foreground = "#ffffff", background = "#656e94" }
 foreground = "#abb2bf"
 background = "#282c34"
 
-[selection]
+#[selection]
 #save_to_clipboard = true
 
 [cursor]
