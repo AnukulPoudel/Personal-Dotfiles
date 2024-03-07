@@ -1,0 +1,25 @@
+[shell]
+program = "/bin/bash"
+
+[window]
+padding = {x=2, y=2}
+decorations = "Full"
+opacity = 0.8
+blur  = true
+resize_increments = true
+
+[colors]
+selection = { foreground = "#ffffff", background = "#656e94" }
+
+[colors.primary]
+foreground = "#abb2bf"
+background = "#282c34"
+
+[selection]
+#save_to_clipboard = true
+
+[cursor]
+style = {shape = "Beam", blinking = "On"}
+unfocused_hollow = false
+blink_timeout = 0
+thickness = 0.20
