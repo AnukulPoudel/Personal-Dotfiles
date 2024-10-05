@@ -1,3 +1,4 @@
+/* needs rofi-emoji package*/
 configuration {
   modes: "combi";
   combi-modes: "window,drun,emoji";
