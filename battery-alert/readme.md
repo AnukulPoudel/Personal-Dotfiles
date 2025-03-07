@@ -1,109 +1,104 @@
-# Battery Alert Script for Arch Linux
+# Battery Alert Script
 
-This script monitors the battery level and alerts the user when it drops below 25% using `dunst` notifications.
+This script monitors the battery level on Linux systems and sends notifications and plays an alert sound when the battery reaches critical levels (below 25%, 20%, 15%, or 10%).
 
-## Prerequisites
+## Features
+- Sends notifications and lays a warning sound when the battery reaches 25%, 20%, 15%, or 10%.
+- Log of sent alerts stored in a file.
 
-Make sure you have `upower` and `dunst` installed on your system:
+## Requirements
+- `notify-send` for displaying notifications.
+- `paplay` for playing sounds (part of the `pulseaudio-utils` package).
+- `udev` rules to automatically trigger the script based on battery levels.
 
-```bash
-sudo pacman -S upower dunst
-```
+## Installation
 
-## Setup Using systemd
-
-To automate the script execution using `systemd`, follow these steps:
-
-### 1. Create the Battery Alert Script
-
-Save the following script as `battery_alert.sh` and make it executable:
+### Step 1: Install Required Packages
+Ensure you have the required packages installed on your system.
 
 ```bash
-#!/bin/bash
-
-# Get battery percentage
-BATTERY_LEVEL=$(upower -i $(upower -e | grep 'BAT') | grep -E "percentage" | awk '{print $2}' | tr -d '%')
-
-# Check if battery is below 25%
-if [[ $BATTERY_LEVEL -lt 25 ]]; then
-    notify-send -u critical "Battery Low" "Charge your laptop! Battery at $BATTERY_LEVEL%" -i battery-caution
-fi
+sudo apt-get install libnotify-bin pulseaudio-utils
 ```
 
-Make it executable:
+### Step 2: Create the Script
+
+1. Save the battery alert script to your preferred location, for example, `~/.config/systemd/user/battery_alert.sh`.
+
+2. Make the script executable:
+```bash
+chmod +x ~/.config/systemd/user/battery_alert.sh
+```
+
+### Step 3: Create a `udev` Rule to Trigger the Script
+
+1. Create a new `udev` rule file:
+```bash
+sudo nano /etc/udev/rules.d/99-battery-alert.rules
+```
+
+2. Add the following lines to trigger the script when the battery reaches critical levels:
 
 ```bash
-chmod +x battery_alert.sh
+# Trigger script when battery reaches 25%, 20%, 15%, or 10%
+SUBSYSTEM=="power_supply", ATTR{capacity}=="25", RUN+="~/.config/systemd/user/battery_alert.sh"
+SUBSYSTEM=="power_supply", ATTR{capacity}=="20", RUN+="~/.config/systemd/user/battery_alert.sh"
+SUBSYSTEM=="power_supply", ATTR{capacity}=="15", RUN+="~/.config/systemd/user/battery_alert.sh"
+SUBSYSTEM=="power_supply", ATTR{capacity}=="10", RUN+="~/.config/systemd/user/battery_alert.sh"
 ```
 
-### 2. Create a systemd Service
-
-Create a `systemd` service file at `~/.config/systemd/user/battery_alert.service`:
-
-```ini
-[Unit]
-Description=Battery Alert Service
-
-[Service]
-ExecStart=/path/to/battery_alert.sh
+3. Reload the `udev` rules:
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger
 ```
 
-Replace `/path/to/battery_alert.sh` with the actual path to your script.
+## Usage
 
-### 3. Create a systemd Timer
+Once everything is set up, the script will automatically trigger when the battery level reaches 25%, 20%, 15%, or 10%, displaying notifications and playing alert sounds.
 
-Create a timer file at `~/.config/systemd/user/battery_alert.timer`:
+- **Notification**: A notification will pop up with the battery status.
+- **Sound**: An alert sound will play when the battery level reaches 25%, 20%, 15%, or 10%, displaying notifications and playing alert sounds.
 
-```ini
-[Unit]
-Description=Run battery alert every 5 minutes
+## Logs
 
-[Timer]
-OnBootSec=1min
-OnUnitActiveSec=5min
-Unit=battery_alert.service
-
-[Install]
-WantedBy=timers.target
-```
-
-### 4. Enable and Start the Timer
-
-Run the following command to enable and start the timer:
+All alert events are logged to the following file: `$HOME/.battery_alert.log`. You can check this log to see when the script was triggered.
 
 ```bash
-systemctl --user enable --now battery_alert.timer
+cat ~/.battery_alert.log
 ```
 
-### 5. Check Timer Status
+## Removal
 
-To verify that the timer is running, use:
+### Step 1: Remove `udev` Rule
+To remove the `udev` rule and stop the script from being triggered:
 
 ```bash
-systemctl --user list-timers --all
+sudo rm /etc/udev/rules.d/99-battery-alert.rules
 ```
 
-To check logs:
+### Step 2: Delete the Script
+You can also delete the script from your system:
 
 ```bash
-journalctl --user -u battery_alert.service --follow
+rm ~/.config/systemd/user/battery_alert.sh
 ```
 
-## Uninstall
-
-To stop and disable the timer:
+### Step 3: Reload `udev` Rules
+After removing the `udev` rule, reload the rules to apply the changes:
 
 ```bash
-systemctl --user disable --now battery_alert.timer
+sudo udevadm control --reload-rules
 ```
 
-To remove the files:
+## Troubleshooting
 
-```bash
-rm ~/.config/systemd/user/battery_alert.{service,timer}
-```
+- **Permissions**: Ensure that the script has execute permissions (`chmod +x battery_alert.sh`).
+- **Testing**: Test the script manually by running it directly to ensure it's working as expected:
+  ```bash
+  ./battery_alert.sh
+  ```
+- **Sound Issues**: If you don’t hear the sound, ensure `pulseaudio-utils` is installed and your system's sound is working correctly.
 
 ---
 
-Now your system will automatically notify you when your battery is low! 🚀
-
+Feel free to modify the script to fit your needs!
