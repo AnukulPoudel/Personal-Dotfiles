@@ -1,9 +1,12 @@
 #!/bin/bash
 
-# Get battery percentage
-BATTERY_LEVEL=$(upower -i $(upower -e | grep 'BAT') | grep -E "percentage" | awk '{print $2}' | tr -d '%')
+# Read battery percentage directly from sysfs
+BATTERY_LEVEL=$(cat /sys/class/power_supply/BAT0/capacity)
 
-# Check if battery is below 25%
-if [[ $BATTERY_LEVEL -lt 25 ]]; then
-    notify-send -u critical "Battery Low" "Charge your laptop! Battery at $BATTERY_LEVEL%" -i battery-caution
+# Exit early if battery is 25% or higher
+if [[ $BATTERY_LEVEL -ge 27 ]]; then
+    exit 0
 fi
+
+# Send notification if battery is below 25%
+notify-send -u critical "Battery Low" "Charge your laptop! Battery at $BATTERY_LEVEL%" -i battery-caution
