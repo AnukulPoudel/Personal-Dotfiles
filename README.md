@@ -6,6 +6,7 @@
 > 4. alacrityy config file
 > 5. rofi window, drun, emojis
 > 6. generates and applies theme based on wallpaper (@requires python-pywal) wal -i wallpaper.jpg
+> 7. Send notifications and alerts user when the battery goes below 25%
 
 > Future ideas: 
 > 1. ipo haru manage garne rofi batai
